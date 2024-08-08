@@ -44,8 +44,23 @@ const logout = async (req, res) => {
   res.status(200).json({ message: 'Logout successful' });
 };
 
+const status = async (req, res) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    return res.json({ loggedIn: false });
+  }
+
+  try {
+    return res.json({ loggedIn: true });
+  } catch (err) {
+    return res.json({ loggedIn: false });
+  }
+};
+
 module.exports = {
   register,
   login,
   logout,
+  status,
 };

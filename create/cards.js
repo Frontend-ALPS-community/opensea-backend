@@ -3,7 +3,7 @@ const Card = require('../models/card.model');
 const createCards = async () => {
   const cardsData = [
     {
-      image: 'uploads/image29.svg',
+      image: '/uploads/image29.svg',
       cardName: 'Sample Card 1',
       owner: 'John Doe',
       price: {
@@ -17,7 +17,7 @@ const createCards = async () => {
       },
     },
     {
-      image: 'uploads/image35.svg',
+      image: '/uploads/image35.svg',
       saleEndDate: new Date('2024-11-30'),
       cardName: 'Sample Card 2',
       owner: 'Jane Smith',

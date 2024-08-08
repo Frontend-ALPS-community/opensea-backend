@@ -10,6 +10,7 @@ const cors = require('cors');
 const authMiddleware = require('./middleware/authMiddleware');
 const Card = require('./models/card.model');
 const userRoute = require('./routes/user.route');
+const cardRoute = require('./routes/card.route');
 const port = 3001;
 
 // middleware
@@ -25,15 +26,7 @@ app.use('/api/uploads', express.static('uploads'));
 
 // routes
 app.use('/api/auth', userRoute);
-
-app.get('/api/card', async (req, res) => {
-  try {
-    const cards = await Card.find({});
-    res.status(200).json(cards);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
+app.use('/api/cards', cardRoute);
 
 mongoose
   .connect(process.env.MONGODB_URL)
