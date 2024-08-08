@@ -5,10 +5,14 @@ const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const User = require('./models/user.model');
+const createCards = require('./create/cards');
 const cors = require('cors');
 const authMiddleware = require('./middleware/authMiddleware');
+const Card = require('./models/card.model');
+const userRoute = require('./routes/user.route');
 const port = 3001;
 
+// middleware
 app.use(
   cors({
     origin: process.env.CLIENT_URL,
@@ -17,58 +21,24 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser());
+app.use('/api/uploads', express.static('uploads'));
 
-app.post('/api/register', async (req, res) => {
+// routes
+app.use('/api/auth', userRoute);
+
+app.get('/api/card', async (req, res) => {
   try {
-    const user = await User.create(req.body);
-    res.status(200).json(user);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-app.post('/api/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid email or password' });
-    }
-
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid email or password' });
-    }
-
-    const token = jwt.sign({ userId: user._id }, 'your_jwt_secret', { expiresIn: '1h' });
-    res.cookie('token', token, { httpOnly: true });
-
-    res.status(200).json({ message: 'Login successful' });
+    const cards = await Card.find({});
+    res.status(200).json(cards);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-app.post('/api/logout', (req, res) => {
-  const token = req.cookies.token;
-
-  if (!token) {
-    return res.status(400).json({ message: 'No token found in cookies' });
-  }
-
-  res.clearCookie('token');
-  res.status(200).json({ message: 'Logout successful' });
-});
-
-app.post('/api/my-page', authMiddleware, (req, res) => {
-  console.log(req.user);
-  res.status(200).json({ message: 'welcome to your page!', user: req.user });
-});
-
 mongoose
   .connect(process.env.MONGODB_URL)
   .then(() => {
+    createCards();
     console.log('Connected to Database');
     app.listen(port, () => {
       console.log(`Server is running on port ${port}`);
