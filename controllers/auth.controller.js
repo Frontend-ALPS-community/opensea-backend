@@ -52,9 +52,9 @@ const status = async (req, res) => {
   }
 
   try {
-    return res.json({ loggedIn: true });
+    return res.status(200).json({ loggedIn: true });
   } catch (err) {
-    return res.json({ loggedIn: false });
+    return res.status(400).json({ loggedIn: false });
   }
 };
 
