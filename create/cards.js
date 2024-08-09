@@ -12,7 +12,7 @@ const createCards = async () => {
       },
       views: 0,
       attributes: {
-        background: 'blue',
+        background: '#CED4D9',
         type: 'magic',
       },
     },
@@ -22,14 +22,14 @@ const createCards = async () => {
       cardName: 'Sample Card 2',
       owner: 'Jane Smith',
       price: {
-        initialPrice: 2000,
+        lastPrice: 2000,
         currentPrice: 1800,
         priceHistory: [2000, 1900, 1800],
       },
       views: 0,
       favorites: ['Dave', 'Eva'],
       attributes: {
-        background: 'red',
+        background: '#FCB5DB',
         type: 'fire',
         wing: 'phoenix',
       },

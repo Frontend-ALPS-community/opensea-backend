@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { getAllCards } = require('../controllers/card.controller');
+const { getAllCards, getCard } = require('../controllers/card.controller');
 
 router.get('/', getAllCards);
+
+router.get('/:id', getCard);
 
 module.exports = router;

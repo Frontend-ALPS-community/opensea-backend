@@ -6,8 +6,8 @@ const cardSchema = mongoose.Schema({
   cardName: { type: String, required: true, unique: true }, // 카드 이름
   owner: { type: String, default: null }, // 소유자 이름
   price: {
-    initialPrice: { type: Number, required: true }, // 초기 가격
     currentPrice: { type: Number, default: null }, // 현재 가격
+    lastPrice: { type: Number }, // 마지막 가격
     priceHistory: { type: [Number], default: [] }, // 가격 기록
   },
   views: { type: Number, default: 0 }, // 조회수

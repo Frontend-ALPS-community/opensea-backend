@@ -9,6 +9,17 @@ const getAllCards = async (req, res) => {
   }
 };
 
+const getCard = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const card = await Card.findById(id);
+    res.status(200).json(card);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
 module.exports = {
   getAllCards,
+  getCard,
 };
