@@ -45,6 +45,8 @@ const createCards = async () => {
     // 필요한 만큼 추가
   ];
 
+  cardsData.map(item=>item.offers.m)
+
   try {
     const savedCards = await Card.insertMany(cardsData);
     console.log('Cards saved successfully:', savedCards);
