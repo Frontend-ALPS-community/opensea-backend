@@ -37,6 +37,7 @@ const createCards = async () => {
         {
           price: 1700,
           expired: false,
+          expiryDate: new Date(),
           proposer: 'Frank',
           transactionCompleted: false,
         },
@@ -44,8 +45,6 @@ const createCards = async () => {
     },
     // 필요한 만큼 추가
   ];
-
-  cardsData.map(item=>item.offers.m)
 
   try {
     const savedCards = await Card.insertMany(cardsData);

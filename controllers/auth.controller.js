@@ -1,3 +1,4 @@
+require('dotenv').config();
 const User = require('../models/user.model');
 const jwt = require('jsonwebtoken');
 
@@ -24,7 +25,9 @@ const login = async (req, res) => {
       return res.status(400).json({ message: 'Invalid email or password' });
     }
 
-    const token = jwt.sign({ userId: user._id }, 'your_jwt_secret', { expiresIn: '1h' });
+    const token = jwt.sign({ userId: user._id, username: user.username }, process.env.JWT_SECRET, {
+      expiresIn: '1h',
+    });
     res.cookie('token', token, { httpOnly: true });
 
     res.status(200).json({ message: 'Login successful' });
@@ -50,9 +53,9 @@ const status = async (req, res) => {
   if (!token) {
     return res.json({ loggedIn: false });
   }
-
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
   try {
-    return res.status(200).json({ loggedIn: true });
+    return res.status(200).json({ loggedIn: true, decoded });
   } catch (err) {
     return res.status(400).json({ loggedIn: false });
   }
