@@ -31,7 +31,9 @@ app.use('/api/cards', cardRoute);
 mongoose
   .connect(process.env.MONGODB_URL)
   .then(() => {
-    // createCards();
+    // for (let i = 0; i < 4; i++) {
+    //   createCards('water', i + 1);
+    // }
     console.log('Connected to Database');
     app.listen(port, () => {
       console.log(`Server is running on port ${port}`);
