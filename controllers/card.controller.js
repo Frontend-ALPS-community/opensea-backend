@@ -1,4 +1,6 @@
 const Card = require('../models/card.model');
+const calcPriceDiffer = require('../util/calcPriceDiffer');
+const calcUsdPrice = require('../util/calcUsdPrice');
 
 const getAllCards = async (req, res) => {
   try {
@@ -22,6 +24,12 @@ const getCard = async (req, res) => {
 const createCardOffer = async (req, res) => {
   try {
     const { id } = req.params;
+    const { price, lowerLimitPrice } = req.body;
+    const priceDifference = calcPriceDiffer(price, lowerLimitPrice);
+    const usdPrice = calcUsdPrice(price);
+    req.body.usdPrice = usdPrice;
+    req.body.priceDifference = priceDifference;
+
     const card = await Card.findById(id);
 
     if (!card) {
@@ -39,7 +47,12 @@ const createCardOffer = async (req, res) => {
 const getPrice = async (req, res) => {
   try {
     const cards = await Card.find({});
-    const total = cards.map((item) => item.price.currentPrice).reduce((acc, curr) => acc + curr);
+    const total = parseFloat(
+      cards
+        .map((item) => item.price.currentPrice)
+        .reduce((acc, curr) => acc + curr)
+        .toFixed(3)
+    );
     const min = Math.min(...cards.map((item) => item.price.currentPrice));
     res.status(200).json({ total, min });
   } catch (err) {

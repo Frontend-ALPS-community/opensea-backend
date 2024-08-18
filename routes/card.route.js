@@ -13,6 +13,6 @@ router.get('/priceInfo', getPrice);
 
 router.get('/:id', getCard);
 
-router.put('/:id/offers', createCardOffer);
+router.post('/:id/offers', createCardOffer);
 
 module.exports = router;
