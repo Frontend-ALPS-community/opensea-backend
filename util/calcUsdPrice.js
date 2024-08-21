@@ -1,5 +1,5 @@
 function calcUsdPrice(price) {
-  return price * 2692;
+  return parseFloat(price * 2692).toFixed(2);
 }
 
 module.exports = calcUsdPrice;

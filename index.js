@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const app = express();
+const cron = require('node-cron');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
@@ -11,6 +12,7 @@ const authMiddleware = require('./middleware/authMiddleware');
 const Card = require('./models/card.model');
 const userRoute = require('./routes/user.route');
 const cardRoute = require('./routes/card.route');
+const removeExpiredOffers = require('./util/removeExpiredOffer');
 const port = 3001;
 
 // middleware
@@ -27,6 +29,19 @@ app.use('/api/uploads', express.static('uploads'));
 // routes
 app.use('/api/auth', userRoute);
 app.use('/api/cards', cardRoute);
+
+app.use((err, req, res, next) => {
+  console.error(err); // 서버 콘솔에 에러 로그
+  if (err.name === 'TokenExpiredError') {
+    return res.status(401).json({ message: 'Token expired' });
+  }
+  // 다른 에러 처리
+  return res.status(500).json({ message: 'Internal Server Error' });
+});
+
+cron.schedule('0 * * * *', async () => {
+  await removeExpiredOffers();
+});
 
 mongoose
   .connect(process.env.MONGODB_URL)

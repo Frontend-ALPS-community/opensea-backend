@@ -25,7 +25,7 @@ const cardSchema = mongoose.Schema({
       price: { type: Number }, // 제안 가격
       usdPrice: { type: Number },
       expired: { type: Boolean }, // 만료 여부
-      expiryDate: { type: Date, default: Date.now }, // 만료 날짜/시간
+      expiryDate: { type: Date }, // 만료 날짜/시간
       priceDifference: { type: String },
       proposer: { type: String }, // 제안자 이름
     },

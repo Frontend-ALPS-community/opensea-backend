@@ -28,11 +28,40 @@ const login = async (req, res) => {
     const token = jwt.sign({ userId: user._id, username: user.username }, process.env.JWT_SECRET, {
       expiresIn: '1h',
     });
+
+    const refreshToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: '7d',
+    });
+
     res.cookie('token', token, { httpOnly: true });
+    res.cookie('refreshToken', refreshToken, { httpOnly: true });
 
     res.status(200).json({ message: 'Login successful' });
   } catch (err) {
     res.status(400).json({ message: err.message });
+  }
+};
+
+const refreshAccessToken = async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+  if (!refreshToken) {
+    return res.status(400).json({ message: 'Refresh token not found, login again' });
+  }
+
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+    const accessToken = jwt.sign(
+      { userId: decoded.userId, username: decoded.username },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: '1h',
+      }
+    );
+
+    res.cookie('token', accessToken, { httpOnly: true });
+    res.status(200).json({ accessToken });
+  } catch (err) {
+    return res.status(403).json({ message: 'Invalid refresh token, login again' });
   }
 };
 
@@ -44,6 +73,7 @@ const logout = async (req, res) => {
   }
 
   res.clearCookie('token');
+  res.clearCookie('refreshToken');
   res.status(200).json({ message: 'Logout successful' });
 };
 
@@ -53,11 +83,15 @@ const status = async (req, res) => {
   if (!token) {
     return res.json({ loggedIn: false });
   }
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
   try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     return res.status(200).json({ loggedIn: true, decoded });
   } catch (err) {
-    return res.status(400).json({ loggedIn: false });
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Token expired', loggedIn: false });
+    } else {
+      return res.status(400).json({ message: 'Token is not valid', loggedIn: false });
+    }
   }
 };
 
@@ -66,4 +100,5 @@ module.exports = {
   login,
   logout,
   status,
+  refreshAccessToken,
 };
