@@ -4,11 +4,11 @@ const dayjs = require('dayjs');
 
 const removeExpiredOffers = async () => {
   try {
-    const now = dayjs();
+    const now = dayjs().toDate();
 
     // 만료된 오퍼를 제거하는 쿼리
     await Card.updateMany(
-      {},
+      { 'offers.expiryDate': { $lt: now } },
       { $pull: { offers: { expiryDate: { $lt: now } } } } // 현재 시간보다 이전이면 삭제
     );
 

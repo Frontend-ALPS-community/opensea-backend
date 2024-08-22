@@ -15,6 +15,8 @@ const getCard = async (req, res) => {
   try {
     const { id } = req.params;
     const card = await Card.findById(id);
+    card.views += 1;
+    await card.save();
     res.status(200).json(card);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -60,9 +62,32 @@ const getPrice = async (req, res) => {
   }
 };
 
+const Favorites = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { username } = req.body;
+    const card = await Card.findById(id);
+    const isFavorites = card.favorites.includes(username);
+    if (isFavorites) {
+      // 즐겨찾기 제거
+      card.favorites = card.favorites.filter((item) => item !== username);
+    } else {
+      // 즐겨찾기 추가
+      card.favorites.push(username);
+    }
+    await card.save();
+    res.status(200).json({
+      message: isFavorites ? '즐겨찾기에서 제거되었습니다.' : '즐겨찾기에 추가되었습니다.',
+    });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
 module.exports = {
   getAllCards,
   getCard,
   createCardOffer,
   getPrice,
+  Favorites,
 };
