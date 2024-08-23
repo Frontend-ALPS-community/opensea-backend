@@ -77,7 +77,7 @@ const Favorites = async (req, res) => {
     }
     await card.save();
     res.status(200).json({
-      message: isFavorites ? '즐겨찾기에서 제거되었습니다.' : '즐겨찾기에 추가되었습니다.',
+      message: isFavorites ? 'delete' : 'add',
     });
   } catch (err) {
     res.status(400).json({ message: err.message });

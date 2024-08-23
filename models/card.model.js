@@ -4,7 +4,7 @@ const cardSchema = mongoose.Schema({
   image: { type: String, required: true }, // 이미지 URL 또는 경로
   saleEndDate: { type: Date, default: null }, // 판매 종료일
   cardName: { type: String, required: true, unique: true }, // 카드 이름
-  owner: { type: String, default: null }, // 소유자 이름
+  owner: { type: String }, // 소유자 이름
   price: {
     currentPrice: { type: Number, default: null }, // 현재 가격
     lastPrice: { type: Number }, // 마지막 가격
