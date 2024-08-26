@@ -16,6 +16,18 @@ const UserSchema = mongoose.Schema({
     type: String,
     required: [true, 'Please enter password'],
   },
+  favorites: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Card',
+    },
+  ], // 사용자가 좋아요 누른 카드들
+  collectedCards: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Card',
+    },
+  ], // 사용자가 수집한 카드들
 });
 
 UserSchema.pre('save', async function (next) {
