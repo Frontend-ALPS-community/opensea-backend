@@ -1,8 +1,8 @@
-const dayjs = require('dayjs');
-const Card = require('../models/card.model');
-const User = require('../models/user.model');
-const calcPriceDiffer = require('../util/calcPriceDiffer');
-const calcUsdPrice = require('../util/calcUsdPrice');
+const dayjs = require("dayjs");
+const Card = require("../models/card.model");
+const User = require("../models/user.model");
+const calcPriceDiffer = require("../util/calcPriceDiffer");
+const calcUsdPrice = require("../util/calcUsdPrice");
 
 const getAllCards = async (req, res) => {
   try {
@@ -37,7 +37,7 @@ const createCardOffer = async (req, res) => {
     const card = await Card.findById(id);
 
     if (!card) {
-      return res.status(400).json({ message: '카드를 찾을 수 없습니다.' });
+      return res.status(400).json({ message: "카드를 찾을 수 없습니다." });
     }
 
     card.offers.push(req.body);
@@ -46,7 +46,7 @@ const createCardOffer = async (req, res) => {
     // 사용자 찾기
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(400).json({ message: '사용자를 찾을 수 없습니다.' });
+      return res.status(400).json({ message: "사용자를 찾을 수 없습니다." });
     }
 
     const userOffer = {
@@ -68,13 +68,14 @@ const createCardOffer = async (req, res) => {
 const getPrice = async (req, res) => {
   try {
     const cards = await Card.find({});
+    const validPrices = cards
+      .map((item) => item.price.currentPrice)
+      .filter((price) => price != null && price > 0);
     const total = parseFloat(
-      cards
-        .map((item) => item.price.currentPrice)
-        .reduce((acc, curr) => acc + curr)
-        .toFixed(3)
+      validPrices.reduce((acc, curr) => acc + curr, 0).toFixed(3)
     );
-    const min = Math.min(...cards.map((item) => item.price.currentPrice));
+
+    const min = validPrices.length > 0 ? Math.min(...validPrices) : null;
     res.status(200).json({ total, min });
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -102,7 +103,7 @@ const Favorites = async (req, res) => {
     await user.save();
 
     res.status(200).json({
-      message: isFavorites ? 'delete' : 'add',
+      message: isFavorites ? "delete" : "add",
     });
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -117,7 +118,7 @@ const buyCard = async (req, res) => {
     // 카드 정보 가져오기
     const card = await Card.findById(id);
     if (!card) {
-      return res.status(404).json({ message: 'Card not found' });
+      return res.status(404).json({ message: "Card not found" });
     }
 
     const sellerName = card.owner;
@@ -125,19 +126,21 @@ const buyCard = async (req, res) => {
     // 판매자 정보 가져오기
     const seller = await User.findOne({ username: sellerName });
     if (!seller) {
-      return res.status(404).json({ message: 'Seller not found' });
+      return res.status(404).json({ message: "Seller not found" });
     }
 
     const buyer = await User.findById(userId);
     if (!buyer) {
-      return res.status(404).json({ message: 'Buyer not found' });
+      return res.status(404).json({ message: "Buyer not found" });
     }
 
     // 카드의 소유자 변경
     card.owner = username;
 
     // 판매자의 collectedCards 배열에서 카드 제거
-    seller.collectedCards = seller.collectedCards.filter((cardId) => cardId.toString() !== id);
+    seller.collectedCards = seller.collectedCards.filter(
+      (cardId) => cardId.toString() !== id
+    );
 
     // 구매자의 collectedCards 배열에 카드 추가
     buyer.collectedCards.push(card._id);
@@ -146,7 +149,7 @@ const buyCard = async (req, res) => {
     await seller.save();
     await buyer.save();
 
-    res.status(200).json({ message: 'Card purchased successfully', card });
+    res.status(200).json({ message: "Card purchased successfully", card });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -160,17 +163,21 @@ const purchaseCard = async (req, res) => {
     // 카드 정보 가져오기
     const card = await Card.findById(id);
     if (!card) {
-      return res.status(404).json({ message: '카드를 찾을 수 없습니다.' });
+      return res.status(404).json({ message: "카드를 찾을 수 없습니다." });
     }
 
     const currentOwner = await User.findOne({ username: card.owner });
     if (!currentOwner) {
-      return res.status(404).json({ message: '기존 소유자를 찾을 수 없습니다.' });
+      return res
+        .status(404)
+        .json({ message: "기존 소유자를 찾을 수 없습니다." });
     }
 
     const newOwner = await User.findById(userId);
     if (!newOwner) {
-      return res.status(404).json({ message: '새로운 소유자를 찾을 수 없습니다.' });
+      return res
+        .status(404)
+        .json({ message: "새로운 소유자를 찾을 수 없습니다." });
     }
 
     const price = card.price.currentPrice;
@@ -181,7 +188,7 @@ const purchaseCard = async (req, res) => {
 
     // 새 소유자의 wallet에서 금액 차감 및 collectedCards에 카드 추가
     if (newOwner.wallet < price) {
-      return res.status(400).json({ message: '잔액이 부족합니다.' });
+      return res.status(400).json({ message: "잔액이 부족합니다." });
     }
 
     newOwner.wallet -= price;
@@ -212,7 +219,9 @@ const purchaseCard = async (req, res) => {
     await currentOwner.save();
     await newOwner.save();
 
-    res.status(200).json({ message: '카드가 성공적으로 구매되었습니다.', card });
+    res
+      .status(200)
+      .json({ message: "카드가 성공적으로 구매되었습니다.", card });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
