@@ -7,7 +7,7 @@ const {
   status,
   refreshAccessToken,
 } = require('../controllers/auth.controller');
-const { addFavorite } = require('../controllers/user.controller');
+const { getFavorites, updateUserOffers, getOffers } = require('../controllers/user.controller');
 
 router.post('/register', register);
 
@@ -19,6 +19,8 @@ router.get('/status', status);
 
 router.post('/refreshAccessToken', refreshAccessToken);
 
-router.post('/:id/favorites', addFavorite);
+router.post('/favorites', getFavorites);
+
+router.post('/offers', getOffers);
 
 module.exports = router;

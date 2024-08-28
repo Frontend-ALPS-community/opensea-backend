@@ -2,15 +2,32 @@ require('dotenv').config();
 const User = require('../models/user.model');
 const Card = require('../models/card.model');
 
-const addFavorite = async (req, res) => {
+const getFavorites = async (req, res) => {
   try {
-    const { id } = req.params;
-    const user = User.findById();
+    const { userId } = req.body;
+    const user = await User.findById(userId).populate('favorites');
+
+    if (user.favorites.length > 0) {
+      res.status(200).json(user.favorites);
+    } else {
+      res.status(400).json({ message: 'invalid Favorites' });
+    }
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(400).json({ message: err.message });
+  }
+};
+
+const getOffers = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const user = await User.findById(userId);
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
   }
 };
 
 module.exports = {
-  addFavorite,
+  getFavorites,
+  getOffers
 };

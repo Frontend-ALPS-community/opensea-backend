@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const dayjs = require('dayjs');
 
 const UserSchema = mongoose.Schema({
   username: {
@@ -28,6 +29,27 @@ const UserSchema = mongoose.Schema({
       ref: 'Card',
     },
   ], // 사용자가 수집한 카드들
+  wallet: {
+    type: Number,
+    default: 1,
+  },
+  offers: [
+    {
+      cardId: { type: mongoose.Schema.Types.ObjectId, ref: 'Card' },
+      date: { type: Date, default: dayjs().toDate() }, // 제안 날짜
+      owner: { type: String }, // 기존 소유자
+      price: { type: Number }, // 가격
+      lastPrice: { type: Number }, // 마지막 가격
+    },
+  ],
+  transaction: [
+    {
+      price: { type: Number },
+      from: { type: String },
+      to: { type: String },
+      date: { type: Date },
+    },
+  ],
 });
 
 UserSchema.pre('save', async function (next) {
