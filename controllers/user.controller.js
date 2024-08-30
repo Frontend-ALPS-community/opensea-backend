@@ -6,7 +6,6 @@ const getFavorites = async (req, res) => {
   try {
     const { userId } = req.body;
     const user = await User.findById(userId).populate('favorites');
-
     if (user.favorites.length > 0) {
       res.status(200).json(user.favorites);
     } else {
@@ -29,5 +28,5 @@ const getOffers = async (req, res) => {
 
 module.exports = {
   getFavorites,
-  getOffers
+  getOffers,
 };

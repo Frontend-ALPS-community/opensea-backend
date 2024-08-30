@@ -25,12 +25,16 @@ const login = async (req, res) => {
       return res.status(400).json({ message: 'Invalid email or password' });
     }
 
-    const token = jwt.sign({ userId: user._id, username: user.username }, process.env.JWT_SECRET, {
-      expiresIn: '1h',
-    });
+    const token = jwt.sign(
+      { userId: user._id, username: user.username, wallet: user.wallet },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: '1h',
+      }
+    );
 
     const refreshToken = jwt.sign(
-      { userId: user._id, username: user.username },
+      { userId: user._id, username: user.username, wallet: user.wallet },
       process.env.JWT_SECRET,
       {
         expiresIn: '7d',
@@ -55,7 +59,7 @@ const refreshAccessToken = async (req, res) => {
   try {
     const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
     const accessToken = jwt.sign(
-      { userId: decoded.userId, username: decoded.username },
+      { userId: decoded.userId, username: decoded.username, wallet: decoded.wallet },
       process.env.JWT_SECRET,
       {
         expiresIn: '1h',

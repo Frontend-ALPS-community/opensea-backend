@@ -13,6 +13,7 @@ const Card = require('./models/card.model');
 const userRoute = require('./routes/user.route');
 const cardRoute = require('./routes/card.route');
 const removeExpiredOffers = require('./util/removeExpiredOffer');
+const dayjs = require('dayjs');
 const port = 3001;
 
 // middleware
@@ -41,6 +42,20 @@ app.use((err, req, res, next) => {
 
 cron.schedule('0 * * * *', async () => {
   await removeExpiredOffers();
+});
+
+cron.schedule('0 * * * *', async () => {
+  try {
+    const now = dayjs().toDate();
+    // saleEndDate가 현재 시각보다 이전인 카드를 찾아서 업데이트
+    await Card.updateMany(
+      { saleEndDate: { $lt: now } }, // saleEndDate가 현재 시각보다 이전인 조건
+      { $set: { 'price.currentPrice': null, saleEndDate: null } }
+    );
+    console.log('Expired cards updated successfully');
+  } catch (error) {
+    console.error('Failed to update expired cards:', error);
+  }
 });
 
 mongoose
