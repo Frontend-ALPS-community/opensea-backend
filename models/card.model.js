@@ -16,7 +16,6 @@ const cardSchema = mongoose.Schema({
     // 카드의 특성
     background: { type: String, default: null },
     type: { type: String, default: null },
-    wing: { type: String, default: null },
     // 추가 특성이 있다면 여기 추가
   },
   offers: [

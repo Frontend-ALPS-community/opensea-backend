@@ -8,6 +8,7 @@ const {
   Favorites,
   purchaseCard,
   sellStart,
+  acceptOffer,
 } = require('../controllers/card.controller');
 
 router.get('/', getAllCards);
@@ -23,5 +24,7 @@ router.post('/:id/favorites', Favorites);
 router.post('/:id/purchaseCard', purchaseCard);
 
 router.post('/:id/sellSetting', sellStart);
+
+router.post('/:cardId/acceptOffer', acceptOffer);
 
 module.exports = router;

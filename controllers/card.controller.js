@@ -175,6 +175,75 @@ const purchaseCard = async (req, res) => {
   }
 };
 
+const acceptOffer = async (req, res) => {
+  try {
+    const { cardId } = req.params;
+    const { username, offerId } = req.body; // 현재 소유자(userId) 정보를 받아옴
+
+    // 카드 정보 가져오기
+    const card = await Card.findById(cardId);
+    if (!card) {
+      return res.status(404).json({ message: '카드를 찾을 수 없습니다.' });
+    }
+
+    // 제안 정보 가져오기
+    const offer = card.offers.id(offerId);
+    if (!offer) {
+      return res.status(404).json({ message: '제안을 찾을 수 없습니다.' });
+    }
+
+    const proposer = await User.findOne({ username: offer.proposer }); // 제안한 사람 정보
+    const currentOwner = await User.findOne({ username }); // 현재 소유자 정보
+
+    if (!proposer) {
+      return res.status(404).json({ message: '제안자를 찾을 수 없습니다.' });
+    }
+    if (!currentOwner) {
+      return res.status(404).json({ message: '기존 소유자를 찾을 수 없습니다.' });
+    }
+
+    const offerPrice = offer.price;
+
+    // 제안자의 잔액 확인
+    if (proposer.wallet < offerPrice) {
+      return res.status(400).json({ message: '잔액이 부족합니다.' });
+    }
+
+    // 기존 소유자의 wallet에 금액 추가 및 제안자의 wallet에서 금액 차감
+    proposer.wallet -= offerPrice;
+    currentOwner.wallet += offerPrice;
+
+    // 카드의 소유자를 제안자로 변경
+    card.owner = proposer.username;
+
+    // 카드의 가격 정보 업데이트
+    card.price.lastPrice = offerPrice; // 현재 거래 가격을 lastPrice로 저장
+    card.price.currentPrice = null; // currentPrice 초기화
+    card.price.priceHistory.push(offerPrice); // 가격 히스토리에 추가
+
+    // 거래 기록 추가
+    const transaction = {
+      price: offerPrice,
+      from: currentOwner.username,
+      to: proposer.username,
+      date: dayjs().toDate(),
+    };
+    card.transaction.push(transaction);
+
+    // 카드의 제안 리스트 초기화
+    card.offers = [];
+
+    // 모든 변경사항 저장
+    await card.save();
+    await proposer.save();
+    await currentOwner.save();
+
+    res.status(200).json({ message: '거래가 성공적으로 완료되었습니다.', card });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 const sellStart = async (req, res) => {
   try {
     const { id } = req.params;
@@ -210,4 +279,5 @@ module.exports = {
   Favorites,
   purchaseCard,
   sellStart,
+  acceptOffer,
 };
