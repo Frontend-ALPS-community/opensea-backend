@@ -19,8 +19,22 @@ const getFavorites = async (req, res) => {
 const getOffers = async (req, res) => {
   try {
     const { userId } = req.body;
-    const user = await User.findById(userId);
-    res.status(200).json(user);
+    const user = await User.findById(userId).populate('offers.cardId');
+    res.status(200).json(user.offers);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+const getCollectedCards = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const user = await User.findById(userId).populate('collectedCards');
+    if (user.collectedCards.length > 0) {
+      res.status(200).json(user.collectedCards);
+    } else {
+      res.status(400).json({ message: 'invalid Favorites' });
+    }
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -29,4 +43,5 @@ const getOffers = async (req, res) => {
 module.exports = {
   getFavorites,
   getOffers,
+  getCollectedCards,
 };
