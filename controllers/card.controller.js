@@ -4,9 +4,43 @@ const User = require('../models/user.model');
 const calcPriceDiffer = require('../util/calcPriceDiffer');
 const calcUsdPrice = require('../util/calcUsdPrice');
 
+const colorObj = {
+  gray: '#CED4D9',
+  green: '#95DBAD',
+  pink: '#FCB5DB',
+  yellow: '#F5CD71',
+  purple: '#ABA3FF',
+  blue: '#99CEFF',
+};
+
+// 색상 이름을 색상 코드로 변환하는 함수
+const getColorCode = (colorName) => {
+  return colorObj[colorName] || colorName; // colorObj에 없는 경우 색상 이름을 그대로 반환
+};
+
 const getAllCards = async (req, res) => {
   try {
-    const cards = await Card.find({});
+    const { sort, colors } = req.query;
+
+    // 색상 필터를 위한 쿼리 조건 생성
+    const colorFilter = colors
+      ? { 'attributes.background': { $in: colors.split(',').map(getColorCode) } }
+      : {};
+
+    // 카드 데이터 조회 및 정렬
+    let cardsQuery = Card.find(colorFilter);
+
+    if (sort === 'price_asc') {
+      cardsQuery = cardsQuery.sort({ 'price.currentPrice': 1 }); // 낮은 가격 순
+    } else if (sort === 'price_desc') {
+      cardsQuery = cardsQuery.sort({ 'price.currentPrice': -1 }); // 높은 가격 순
+    } else {
+      // 기본 정렬 (낮은 가격 순)
+      cardsQuery = cardsQuery.sort({ 'price.currentPrice': 1 });
+    }
+
+    const cards = await cardsQuery;
+
     res.status(200).json(cards);
   } catch (err) {
     res.status(400).json({ message: err.message });
